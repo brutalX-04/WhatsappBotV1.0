@@ -1,6 +1,6 @@
 const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const { Sticker, createSticker, StickerTypes } = require('wa-sticker-formatter');
-const { downloadMediaMessage, Mimetype, MessageType, getMessageFromStore  } = require('@whiskeysockets/baileys');
+const { downloadMediaMessage, Mimetype, MessageType  } = require('@whiskeysockets/baileys');
 const rmvbg = require('./tools/rmvbg.js');
 const sticker = require('./tools/sticker.js');
 const cheerio = require('cheerio');
@@ -87,10 +87,6 @@ async function connectToWhatsapp() {
 
             } else if (messageType === 'extendedTextMessage') (async () => {
                 const pesan = msg.message.extendedTextMessage.text;
-                const oldMsg = msg.message.extendedTextMessage.contextInfo;
-                const updatedMediaMsg = await socket.updateMediaMessage(oldMsg)
-                console.log(updateMediaMessage);
-                read();
 
                 if (pesan === ".sticker") (async () => {
                     console.log(pesan);
@@ -103,7 +99,6 @@ async function connectToWhatsapp() {
                     try {
                         await write.writeFile('src/media/download.jpg', buffer);
                         console.log('Succes download media');
-                        await reply('_Bentar ngab lagi proses..._');
                         await rmvbg.rmvbg(socket, msg);
                     } catch (error) {
                         await reply('_Mohon maaf program gagal mendownload file_');
@@ -116,18 +111,17 @@ async function connectToWhatsapp() {
                     try {
                         caption = msg.message.imageMessage.caption;
                         const buffer = await downloadMediaMessage(msg,'buffer',
-                                { },
-                                { 
-                                    logger,
-                                    reuploadRequest: socket.updateMediaMessage
-                                }
-                            );
+                            { },
+                            { 
+                                logger,
+                                reuploadRequest: socket.updateMediaMessage
+                            }
+                        );
                         
                         if (caption === '.removebg') {
                             try {
                                 await write.writeFile('src/media/download.jpg', buffer);
                                 console.log('Succes download media');
-                                await reply('_Bentar ngab lagi proses..._');
                                 await rmvbg.rmvbg(socket, msg);
 
                             } catch (error) {
@@ -145,7 +139,6 @@ async function connectToWhatsapp() {
                             try {
                                 await write.writeFile('src/media/sticker.png', buffer);
                                 console.log('Succes download media');
-                                await reply('_Bentar ngab lagi proses..._');
                                 await sticker.stickercreat(socket, msg, typ);
 
                             } catch (error) {
@@ -166,10 +159,15 @@ async function connectToWhatsapp() {
             } else if (messageType === 'viewOnceMessageV2') (async () => {
                 await socket.sendMessage(msg.key.remoteJid, { forward: msg });
                 
-            })(); else if (msg.key.remoteJid === 'status@broadcast') {
+            })(); else if (msg.key.remoteJid === 'status@broadcast') (async () => {
                 console.log('ada status terbaru');
+                try {
+                    await socket.sendMessage(msg.key.remoteJid, { forward: msg });
+                } catch (err) {
+                    console.log(err);
+                };
 
-            } else if (msg.key.fromMe === true) {
+            })(); else if (msg.key.fromMe === true) {
                     console.log('pesan masuk : from me');
 
             };
