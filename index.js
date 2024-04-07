@@ -161,11 +161,11 @@ async function connectToWhatsapp() {
                 
             })(); else if (msg.key.remoteJid === 'status@broadcast') (async () => {
                 console.log('ada status terbaru');
-                try {
-                    await socket.sendMessage(msg.key.remoteJid, { forward: msg });
+                /*try {
+                    await socket.sendMessage('6283846780373@s.whatsapp.net', { forward: msg });
                 } catch (err) {
                     console.log(err);
-                };
+                };*/
 
             })(); else if (msg.key.fromMe === true) {
                     console.log('pesan masuk : from me');
